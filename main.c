@@ -8,12 +8,6 @@ int main(){
     file = fopen("entrada.txt","r");
     if(file == NULL) return -1;
 
-    // char tudo[1000];
-
-    // while(fgets(tudo, 1000, file) != NULL){
-    //     printf("%s", tudo);
-    // }
-
     char alfabeto[30], qtd_estados[2];
     int qtd_transicoes;
 
@@ -21,60 +15,10 @@ int main(){
 
     printf("%s %s %d\n", alfabeto, qtd_estados, qtd_transicoes);
 
-    // char test1[1], test2[30], test3[30];
-
-    // fgets(test1, 100, file);
-    // fgets(test2, 100, file);
-    // fgets(test3, 100, file);
-
-    // printf("\naaa%sbbb%sccc%s", test1, test2, test3);
-
-    // char oi, oi2, oi3, oi4, oi5, oi6, oi7, oi8;
-
-    // fscanf(file, "%c %c %c %c %c %c %c %c", &oi, &oi2, &oi3, &oi4, &oi5, &oi6, &oi7, &oi8);
-
-    // printf("aaaa%c %c %c %c %c %c %c %c", oi, oi2, oi3, oi4, oi5, oi6, oi7, oi8);
-
-    // for(int i = 0; i < qtd_transicoes; i++){
-    //     for(int j = 0; j < 5; j++){
-
-    //         fscanf(file, "%c", &mapeamento[i][j]);
-    //         fscanf(file, "%c", &lixo[0]);
-    //     }
-    //     // fgets(lixo, 2, file);
-    // }
-
-    // for(int i = 0; i < qtd_transicoes; i++){
-    //     fscanf(file, "%s", &mapeamento[i]);
-    // }
-
-    // for(int i = 0; i < qtd_transicoes; i++){
-    //     for(int j = 0; j < 5; j++){
-
-    //         printf("%c", mapeamento[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-
-    // for(int i = 0; i < qtd_transicoes; i++){
-    //     printf("mm%s\n", mapeamento[i]);
-    // }
-
-    // char linha[15], linha2[15];
-
-    // fgets(linha, 15, file);
-    // fgets(linha2, 15, file);
-
-    // printf("%s", linha);
-    // printf("%s", linha2);
-
-    // printf("*%c", linha[4]);
-
     char lixo[5];
     fgets(lixo, 5, file); // pegar a quebra de linha
 
     char mapeamento[11][5];
-
     char linha[12];
 
     for(int i = 0; i < qtd_transicoes; i++){
@@ -96,45 +40,94 @@ int main(){
         printf("\n");
     }
 
-    char fita[] = "aaabbb-";
-    int resultado = 0, pos_cabeca = 0;
-    char estado[2] = "1";
+    int qtd_palavras;
+
+    fscanf(file, "%d", &qtd_palavras);
+
+    fgets(lixo, 5, file); // pegar a quebra de linha
+
+    char palavras[4][10];
+
+    for(int i = 0; i < qtd_palavras; i++){
+        for(int j = 0; j < 10; j++){
+
+            palavras[i][j] = '-';
+        }
+        fscanf(file, "%s", &palavras[i]);
+    }
+
+    for(int i = 0; i < qtd_palavras; i++){
+        for(int j = 0; j < 10; j++){
+
+            if(palavras[i][j] == '\000')
+                palavras[i][j] = '-';
+        }
+    }
+
+    for(int i = 0; i < qtd_palavras; i++){
+        for(int j = 0; j < 10; j++){
+
+            printf("%c", palavras[i][j]);
+        }
+        printf("\n");
+    }
+
+    char fita[10];
+    int resultado, pos_cabeca;
+    char estado[2];
     bool flag;
+    char fita_print[10];
 
-    do {
+    for(int palavra = 0; palavra < qtd_palavras; palavra++){
 
-        flag = false;
+        for(int i = 0; i < 10; i++){
+            fita[i] = palavras[palavra][i];
+        }
+        resultado = 0, pos_cabeca = 0;
+        *estado = '1';
 
-        for(int i = 0; i < qtd_transicoes; i++){
+        for(int i = 0; fita[i] != '-'; i++){
+            fita_print[i] = fita[i];
+        }
 
-            if(mapeamento[i][0] == *estado && mapeamento[i][1] == fita[pos_cabeca]){
+        do {
 
-                fita[pos_cabeca] = mapeamento[i][2];
-                *estado = mapeamento[i][4];
+            flag = false;
 
-                if(mapeamento[i][3] == 'D'){
-                    pos_cabeca++;
+            for(int i = 0; i < qtd_transicoes; i++){
+
+                if(mapeamento[i][0] == *estado && mapeamento[i][1] == fita[pos_cabeca]){
+
+                    fita[pos_cabeca] = mapeamento[i][2];
+                    *estado = mapeamento[i][4];
+
+                    if(mapeamento[i][3] == 'D'){
+                        pos_cabeca++;
+                    }
+                    else {
+                        pos_cabeca--;
+                    }
+
+                    flag = true;
+                    break;
                 }
-                else {
-                    pos_cabeca--;
-                }
-
-                flag = true;
-                break;
             }
-            
-        }
 
-        if(*estado == *qtd_estados){
-            resultado = 1;
-        }
-        else if(!flag){
-            resultado = 2;
-        }
+            if(*estado == *qtd_estados){
+                resultado = 1;
+            }
+            else if(!flag){
+                resultado = 2;
+            }
 
-    } while(resultado == 0);
+        } while(resultado == 0);
 
-    printf("final %s legal\n", fita);
+        if(resultado == 1) {
+            printf("%d: %s OK\n", palavra, fita_print);
+        } else {
+            printf("%d: %s not OK\n", palavra, fita_print);
+        }
+    }
 
     fclose(file);
     return 0;
