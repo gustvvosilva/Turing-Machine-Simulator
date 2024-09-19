@@ -1,5 +1,22 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
+
+typedef struct MAP {
+    int est_atual;
+    char lendo;
+    char grava;
+    char direcao;
+    int est_destino;
+} MAP;
+
+void inserir_mapeamento(FILE *file, MAP *mapeamento, int qtd_transicoes) {
+
+    for(int i = 0; i < qtd_transicoes; i++){
+
+        fscanf(file, "%d %c %c %c %d", &mapeamento[i].est_atual, &mapeamento[i].lendo, 
+            &mapeamento[i].grava, &mapeamento[i].direcao, &mapeamento[i].est_destino);
+    }
+}
 
 int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
 
@@ -8,35 +25,22 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
     file = fopen("entrada.txt", "r");  // Abre o arquivo txt que for passado no modo leitura.
     if(file == NULL) return -1;  // Se passar o nome do arquivo errado ele sai do programa.
 
-    char alfabeto[30], qtd_estados[2];  // qtd_estados como string pra ficar mais facil de comparar no laço principal.
-    int qtd_transicoes;
+    char alfabeto[30];
+    int qtd_estados, qtd_transicoes;
 
-    fscanf(file, "%s %s %d", &alfabeto, &qtd_estados, &qtd_transicoes);  // Obtem as 3 primeiras linhas.
-    printf("%s\n%s\n%d\n", alfabeto, qtd_estados, qtd_transicoes);
+    fscanf(file, "%s %d %d", &alfabeto, &qtd_estados, &qtd_transicoes);  // Obtem as 3 primeiras linhas.
+    printf("%s\n%d\n%d\n", alfabeto, qtd_estados, qtd_transicoes);
 
     char lixo[5];
     fgets(lixo, 5, file);  // Pegar e descartar a quebra de linha.
 
-    char mapeamento[11][5];  // #TODO: 11 transições chumbadas por enquanto, seria melhor usar lista encadeada de structs (imo).
-    char linha[12];  // #TODO: Problema! Pois se o estado tiver dois digitos, essa lógica quebra.
+    MAP *mapeamento = (MAP *) malloc(qtd_transicoes * sizeof(MAP));
+
+    inserir_mapeamento(file, mapeamento, qtd_transicoes);  // #TODO: Falta fazer as validacoes, como verificar se a letra tem no alfabeto e tals
 
     for(int i = 0; i < qtd_transicoes; i++){
-
-        fgets(linha, 12, file);
-
-        mapeamento[i][0] = linha[0];
-        mapeamento[i][1] = linha[2];
-        mapeamento[i][2] = linha[4];
-        mapeamento[i][3] = linha[6];
-        mapeamento[i][4] = linha[8];
-    }
-
-    for(int i = 0; i < qtd_transicoes; i++){
-        for(int j = 0; j < 5; j++){
-
-            printf("%c", mapeamento[i][j]);
-        }
-        printf("\n");
+        printf("%d %c %c %c %d\n", mapeamento[i].est_atual, mapeamento[i].lendo, 
+            mapeamento[i].grava, mapeamento[i].direcao, mapeamento[i].est_destino);
     }
 
     int qtd_palavras;
@@ -73,8 +77,8 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
     printf("\n");
 
     char fita[10];  // Máquina de Turing Multi-fita por enquanto, ou seja, cada palavra em uma fita.
-    int resultado, pos_cabeca;
-    char estado[2];
+    int resultado, pos_cabeca, estado;
+
 
     for(int palavra = 0; palavra < qtd_palavras; palavra++){
 
@@ -82,7 +86,7 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
             fita[i] = palavras[palavra][i];  // Joga uma palavra na fita por vez.
         }
         resultado, pos_cabeca = 0;
-        *estado = '1';
+        estado = 1;
 
         do {
 
@@ -91,12 +95,12 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
             for(int i = 0; i < qtd_transicoes; i++){
 
                 // Procura o ESTADO que a máquina se encontra e o que ESTÁ LENDO o cabeçote de leitura da fita.
-                if(mapeamento[i][0] == *estado && mapeamento[i][1] == fita[pos_cabeca]){
+                if(mapeamento[i].est_atual == estado && mapeamento[i].lendo == fita[pos_cabeca]){
 
-                    fita[pos_cabeca] = mapeamento[i][2];  // Escreve na fita com base no mapeamento.
-                    *estado = mapeamento[i][4];  // Próximo estado.
+                    fita[pos_cabeca] = mapeamento[i].grava;  // Escreve na fita com base no mapeamento.
+                    estado = mapeamento[i].est_destino;  // Próximo estado.
 
-                    if(mapeamento[i][3] == 'D'){  // Movimenta o cabeçote na fita.
+                    if(mapeamento[i].direcao == 'D'){  // Movimenta o cabeçote na fita.
                         pos_cabeca++;
                     }
                     else {
@@ -108,7 +112,7 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
                 }
             }
 
-            if(*estado == *qtd_estados){
+            if(estado == qtd_estados){
                 resultado = 1;  // Se chegou no estado de aceitação == SUCESSO!
             }
 
@@ -125,6 +129,7 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
         }
     }
 
+    free(mapeamento);
     fclose(file);  // Libera o arquivo txt da memória.
     return 0;
 }
