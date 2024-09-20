@@ -10,10 +10,11 @@ int main(){
     file = fopen("entrada.txt", "r");  // Abre o arquivo txt que for passado no modo leitura.
     if(file == NULL) return -1;  // Se passar o nome do arquivo errado ele sai do programa.
 
-    char alfabeto[30], resto[5];  // Alfabeto de tamanho 30 como requisitado no PDF,
-    int qtd_estados, qtd_transicoes, qtd_palavras;  // o resto serve apenas para retirar quebras de linha do ponteiro.
+    char alfabeto[30],  // Alfabeto de tamanho 30 como requisitado no PDF.
+         resto[5];  // O resto serve apenas para retirar quebras de linha do ponteiro.
+    int qtd_estados, qtd_transicoes, qtd_palavras;
 
-    fscanf(file, "%s %d %d", &alfabeto, &qtd_estados, &qtd_transicoes);  // Obtem as 3 primeiras linhas.
+    fscanf(file, "%s %d %d", alfabeto, &qtd_estados, &qtd_transicoes);  // Obtem as 3 primeiras linhas.
     fgets(resto, 5, file);  // Pegar e descartar a quebra de linha.
     // printf("%s\n%d\n%d\n", alfabeto, qtd_estados, qtd_transicoes);
 
