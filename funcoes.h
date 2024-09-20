@@ -13,4 +13,5 @@ typedef struct MAP {
 
 int descobrir_estado_inicial(MAP *mapeamento, int qtd_transicoes);
 bool inserir_mapeamento(FILE *file, MAP *mapeamento, int qtd_transicoes, char *alfabeto);
-char **ler_palavras(FILE *file, int qtd_palavras);
+char **ler_palavras(FILE *file, int qtd_palavras, char *alfabeto);
+void limpar_fita(char *fita);

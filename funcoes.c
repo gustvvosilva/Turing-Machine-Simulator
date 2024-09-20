@@ -25,7 +25,7 @@ bool inserir_mapeamento(FILE *file, MAP *mapeamento, int qtd_transicoes, char *a
     return true;
 }
 
-char **ler_palavras(FILE *file, int qtd_palavras) {
+char **ler_palavras(FILE *file, int qtd_palavras, char *alfabeto) {
 
     char **leitura = (char **) malloc(sizeof(char *) * (qtd_palavras + 1));
 
@@ -40,7 +40,17 @@ char **ler_palavras(FILE *file, int qtd_palavras) {
                 leitura[i][j] = '-';
                 break;
             }
+
+            if (strchr(alfabeto, leitura[i][j]) == NULL) {
+                printf("ATENCAO: Foi detectada uma palavra com simbolos que nao pertencem ao alfabeto.\n");
+            }
         }
     }
     return leitura;
+}
+
+void limpar_fita(char *fita) {
+    for(int i = 0; i < 100; i++) {
+        fita[i] = '-';
+    }
 }
