@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 typedef struct MAP {
     int est_atual;
@@ -9,13 +11,29 @@ typedef struct MAP {
     int est_destino;
 } MAP;
 
-void inserir_mapeamento(FILE *file, MAP *mapeamento, int qtd_transicoes) {
+int descobrir_estado_inicial(MAP *mapeamento, int qtd_transicoes) {
+    int inicial = -1;
+
+    for (int i = 0; i < qtd_transicoes; i++) {
+        if (mapeamento[i].est_atual < inicial || inicial == -1)
+            inicial = mapeamento[i].est_atual;
+    }
+    return inicial;
+}
+
+bool inserir_mapeamento(FILE *file, MAP *mapeamento, int qtd_transicoes, char *alfabeto) {
 
     for(int i = 0; i < qtd_transicoes; i++){
 
         fscanf(file, "%d %c %c %c %d", &mapeamento[i].est_atual, &mapeamento[i].lendo, 
             &mapeamento[i].grava, &mapeamento[i].direcao, &mapeamento[i].est_destino);
+
+        if(strchr(alfabeto, mapeamento[i].lendo) == NULL && mapeamento[i].lendo != '-'
+            || strchr(alfabeto, mapeamento[i].grava) == NULL && mapeamento[i].grava != '-'){
+            return false;
+        }
     }
+    return true;
 }
 
 int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
@@ -36,7 +54,10 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
 
     MAP *mapeamento = (MAP *) malloc(qtd_transicoes * sizeof(MAP));
 
-    inserir_mapeamento(file, mapeamento, qtd_transicoes);  // #TODO: Falta fazer as validacoes, como verificar se a letra tem no alfabeto e tals
+    if (!inserir_mapeamento(file, mapeamento, qtd_transicoes, alfabeto)) {
+        printf("\nERRO! Foi detectado um caractere invalido nas transicoes.\nEncerrando...\n");
+        return -1;
+    }
 
     for(int i = 0; i < qtd_transicoes; i++){
         printf("%d %c %c %c %d\n", mapeamento[i].est_atual, mapeamento[i].lendo, 
@@ -49,44 +70,39 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
     fgets(lixo, 5, file);  // Pegar e descartar a quebra de linha.
     printf("%d\n", qtd_palavras);
 
-    char palavras[4][10];  // #TODO: Chumbado! Mesmo problema do mapeamento.
+    char **palavras = (char **) malloc(sizeof(char *) * (qtd_palavras + 1));
 
-    for(int i = 0; i < qtd_palavras; i++){
-        for(int j = 0; j < 10; j++){
+    for (int i = 0; i < qtd_palavras; i++) {
+        palavras[i] = (char *) calloc((100 + 1), sizeof(char));
 
-            palavras[i][j] = '-';  // Preenche o espaço da palavra com "espaço vazio".
+        for(int j = 0; j < 100; j++){
+
+            fscanf(file, "%c", &palavras[i][j]);
+
+            if (palavras[i][j] == '\n' || palavras[i][j] == '\000') {
+                palavras[i][j] = '-';
+                break;
+            }
         }
-        fscanf(file, "%s", &palavras[i]);  // Atribue a palavra.
-    }
-
-    for(int i = 0; i < qtd_palavras; i++){
-        for(int j = 0; j < 10; j++){
-
-            if(palavras[i][j] == '\000')  // Laço APENAS pra tirar a quebra de linha das palavras.
-                palavras[i][j] = '-';     // Deve ter um jeito mais inteligente de fazer...
-        }
-    }
-
-    for(int i = 0; i < qtd_palavras; i++){
-        for(int j = 0; j < 10; j++){
-
-            printf("%c", palavras[i][j]);
-        }
-        printf("\n");
+        printf("%s\n", palavras[i]);
     }
     printf("\n");
 
-    char fita[10];  // Máquina de Turing Multi-fita por enquanto, ou seja, cada palavra em uma fita.
+    char fita[100];
     int resultado, pos_cabeca, estado;
-
+    int estado_inicial = descobrir_estado_inicial(mapeamento, qtd_transicoes);
 
     for(int palavra = 0; palavra < qtd_palavras; palavra++){
 
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 100; i++){
+
             fita[i] = palavras[palavra][i];  // Joga uma palavra na fita por vez.
+
+            if (fita[i] == '-')
+                break;
         }
         resultado, pos_cabeca = 0;
-        estado = 1;
+        estado = estado_inicial;
 
         do {
 
@@ -129,6 +145,10 @@ int main(){  // #TODO: Organizar em funções/arquivos e limpar o código.
         }
     }
 
+    for (int i = 0; i < qtd_palavras; i++) {
+        free(palavras[i]);
+    }
+    free(palavras);
     free(mapeamento);
     fclose(file);  // Libera o arquivo txt da memória.
     return 0;
