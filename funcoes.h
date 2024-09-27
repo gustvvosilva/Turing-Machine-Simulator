@@ -4,11 +4,11 @@
 #include <stdbool.h>
 
 typedef struct MAP {
-    int est_atual;
-    char lendo;
-    char grava;
-    char direcao;
-    int est_destino;
+    int est_atual;     // Estado corrente;
+    char lendo;        // Símbolo do alfabeto lido;
+    char grava;        // Gravar na fita;
+    char direcao;      // Direção do movimento da cabeça na fita;
+    int est_destino;   // Próximo estado.
 } MAP;
 
 int descobrir_estado_inicial(MAP *mapeamento, int qtd_transicoes);
